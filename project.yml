@@ -1,0 +1,13 @@
+name: Yemen4G
+options:
+  bundleIdPrefix: com.qaqa
+targets:
+  Yemen4G:
+    type: application
+    platform: iOS
+    deploymentTarget: "14.0"
+    sources: [Sources]
+    info:
+      path: Info.plist
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.qaqa.yemen4g

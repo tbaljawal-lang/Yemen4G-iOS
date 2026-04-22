@@ -1,0 +1,32 @@
+name: iOS Real Builder
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode Project
+        run: xcodegen generate
+      - name: Build and Ad-Hoc Sign
+        run: |
+          xcodebuild clean build -project Yemen4G.xcodeproj -scheme Yemen4G -sdk iphoneos -configuration Release CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" -derivedDataPath build_output
+          
+          echo "🔍 Finding the App..."
+          APP_PATH=$(find build_output/Build/Products/Release-iphoneos -name "*.app" | head -n 1)
+          
+          echo "🔐 Applying Ad-Hoc Signature via GitHub..."
+          /usr/bin/codesign --force --sign - --timestamp=none "$APP_PATH"
+          
+          echo "📦 Packaging directly to IPA..."
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -qr Yemen4G_Signed.ipa Payload
+          
+      - name: Upload Signed IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yemen4G-App-Signed
+          path: Yemen4G_Signed.ipa
